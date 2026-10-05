@@ -5,12 +5,10 @@ import os
 def main():
     print("Starting data ingestion and transformation pipeline...")
 
-    # 1. Safely handle file paths (works whether you run from root or /src)
     base_dir = os.path.dirname(os.path.abspath(__file__))
     input_path = os.path.join(base_dir, '..', 'data', 'supply_chain_dataset1.csv')
     output_path = os.path.join(base_dir, '..', 'data', 'processed_inventory_data.csv')
 
-    # 2. Load the Kaggle dataset
     try:
         df = pd.read_csv(input_path)
         print(f"Successfully loaded {len(df)} rows.")
@@ -18,56 +16,55 @@ def main():
         print(f"ERROR: Could not find dataset at {input_path}")
         return
 
-    # 3. Standardize column names (strips spaces, makes everything lowercase)
-    # This prevents KeyErrors if Kaggle uses "Inventory Level" instead of "Inventory_Level"
+    # Defensive cleaning: lowercasing and stripping hidden spaces
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
 
-    # Check for the correct 'category' and 'inventory' columns based on the clean names
-    category_col = 'category' if 'category' in df.columns else 'product_category' if 'product_category' in df.columns else df.columns[0]
-    inventory_col = 'inventory_level' if 'inventory_level' in df.columns else 'inventory' if 'inventory' in df.columns else 'quantity'
+    # FIX 1: Convert date object to actual datetime format based on EDA
+    df['date'] = pd.to_datetime(df['date'])
 
-    # 4. Engineer the Storage_Cost_Per_SqFt column based on Product Category
+    # FIX 2: Synthesize the missing 'category' column based on the 50 unique SKUs
+    np.random.seed(42)
+    categories = ['electronics', 'furniture', 'apparel', 'heavy machinery']
+    unique_skus = df['sku_id'].unique()
+    sku_to_category = {sku: np.random.choice(categories) for sku in unique_skus}
+    
+    df['product_category'] = df['sku_id'].map(sku_to_category)
+
+    # Engineer the Storage_Cost_Per_SqFt column based on our synthetic category
     cost_mapping = {
         'electronics': 0.25, 
         'furniture': 0.85, 
         'apparel': 0.15,
         'heavy machinery': 1.10
     }
-    
-    # Apply mapping. If the exact category isn't found, default to $0.40
-    df['storage_cost_per_sqft'] = df[category_col].astype(str).str.lower().map(cost_mapping).fillna(0.40)
+    df['storage_cost_per_sqft'] = df['product_category'].map(cost_mapping)
 
-    # 5. Simulate 'Unit_Square_Footage' for each item
-    np.random.seed(42) # Keeps random numbers consistent across runs
+    # Simulate 'Unit_Square_Footage'
     df['unit_square_footage'] = np.where(
-        df[category_col].astype(str).str.lower().str.contains('furniture'), 
+        df['product_category'] == 'furniture', 
         np.random.uniform(5.0, 15.0, len(df)),
         np.where(
-            df[category_col].astype(str).str.lower().str.contains('electronics'), 
+            df['product_category'] == 'electronics', 
             np.random.uniform(0.5, 2.0, len(df)), 
             1.0
         )
     )
 
-    # 6. Simulate 'Months_Stagnant' 
-    # (Since we haven't built the advanced SQL window functions yet, we simulate it to test the math)
+    # Simulate 'Months_Stagnant' 
     df['months_stagnant'] = np.random.randint(0, 12, size=len(df))
 
-    # 7. Calculate the Total_Holding_Cost for the Dead Stock
+    # Calculate Total_Holding_Cost 
     df['total_holding_cost'] = (
-        df[inventory_col] * 
+        df['inventory_level'] * 
         df['unit_square_footage'] * 
         df['storage_cost_per_sqft'] * 
         df['months_stagnant']
     )
 
-    # 8. Export the processed data for Power BI / Dashboarding
     df.to_csv(output_path, index=False)
     
-    # 9. Review the new financial metrics
     print("\n--- Pipeline Complete. Data Snippet ---")
-    print(df[[category_col, inventory_col, 'months_stagnant', 'total_holding_cost']].head())
-    print(f"\nProcessed data saved successfully to: {output_path}")
+    print(df[['date', 'sku_id', 'product_category', 'total_holding_cost']].head())
 
 if __name__ == "__main__":
     main()
