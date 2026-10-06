@@ -33,12 +33,14 @@ Working capital is frequently trapped in stagnant inventory, generating massive 
 ## Dashboards
 ### 1. The Diagnostic View (The Problem)
 *Focuses on macro financial exposure and identifying the root cause of capital drain.*
-<img width="1192" height="674" alt="image" src="https://github.com/user-attachments/assets/5fa9b83a-7904-491c-bba0-8533ee6fe63f" />
+<img width="1348" height="754" alt="image" src="https://github.com/user-attachments/assets/04fdc446-1312-4141-967e-70a5c5d10a90" />
+
 
 
 ### 2. The Action & Impact View (The Solution)
 *Provides a direct operational hit list and calculates the projected cash recovery ROI.*
-<img width="1181" height="669" alt="image" src="https://github.com/user-attachments/assets/7b141a4d-fdc3-4e39-b6d3-d1f3307d988f" />
+<img width="1348" height="751" alt="image" src="https://github.com/user-attachments/assets/e24bce2d-78bb-4831-aa83-f0e9f62c5dea" />
+
 
 
 ## Repository Structure
