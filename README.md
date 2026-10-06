@@ -6,7 +6,7 @@ This project is an end-to-end data engineering and analytics pipeline designed t
 ## Tech Stack
 * **Data Processing & Engineering:** Python (Pandas)
 * **Exploratory Data Analysis (EDA) & Logic:** SQL (CTEs, Aggregations, Window Functions)
-* **Visualization & Reporting:** Power BI, DAX, *Storytelling With Data* (SWD) Design Principles
+* **Visualization & Reporting:** Power BI, DAX
 
 ## Business Problem
 Working capital is frequently trapped in stagnant inventory, generating massive holding costs without driving revenue. The objective was to move beyond transactional data to identify structural supply chain bottlenecks and provide procurement teams with a targeted, data-backed liquidation "Hit List."
